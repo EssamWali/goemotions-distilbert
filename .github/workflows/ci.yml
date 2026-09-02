@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Imports and label agreement
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        # CPU-only torch: the GPU wheels are 2 GB and nothing here trains in CI.
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt pytest
+
+      # Training needs a GPU and fifteen minutes, so CI does not attempt it. What
+      # it can check is that the scripts still import and that training and
+      # evaluation have not drifted apart about how a label is derived - which is
+      # the failure that would silently invalidate every number in the README.
+      - name: Scripts import
+        run: |
+          python -c "import train, evaluate, predict; print('ok')"
+      - name: Label handling agrees across train and eval
+        run: pytest tests -q
