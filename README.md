@@ -85,7 +85,7 @@ line on stdin.
 ```
 pip install -r requirements.txt
 
-python train.py --epochs 6     # writes checkpoint.pt
+python train.py --epochs 6     # writes checkpoint.pt (seeded; --seed to change)
 python evaluate.py             # metrics on the test split, writes metrics.json
 python predict.py "some text"  # or pipe lines on stdin
 pytest tests -q                # label-rule agreement (pip install pytest first)

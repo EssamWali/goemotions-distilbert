@@ -14,6 +14,7 @@ Two things differ from the notebook this came from, both deliberate:
 """
 
 import argparse
+import random
 from collections import Counter
 from pathlib import Path
 
@@ -63,7 +64,19 @@ def main():
     parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--out", default="checkpoint.pt")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="seeds Python, torch and the DataLoader shuffle so a run can be repeated",
+    )
     args = parser.parse_args()
+
+    # Seed everything the run depends on. Without this two runs of the same command
+    # produce different checkpoints, and a metrics.json cannot be tied to the command
+    # that made it. (GPU kernels can still introduce small nondeterminism.)
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"device: {device}")
